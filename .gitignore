@@ -1,0 +1,22 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# Helm
+*.tgz
