@@ -1,11 +1,33 @@
 #!/bin/bash
 
-LOG="$HOME/lab-notes/monitoring/baseline/00-initial-install/baseline.log"
+set -euo pipefail
 
-echo "==================================================" >> "$LOG"
-echo "$(date '+%F %T') : $*" >> "$LOG"
-echo "==================================================" >> "$LOG"
+if [ $# -lt 2 ]; then
+    echo "Usage: $0 <experiment> <command> [args...]"
+    exit 1
+fi
 
-"$@" >> "$LOG" 2>&1
+EXPERIMENT="$1"
+shift
 
-echo >> "$LOG"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+LOGDIR="$ROOT/monitoring/baselines/$EXPERIMENT"
+
+mkdir -p "$LOGDIR"
+
+LOGFILE="$LOGDIR/baseline.log"
+
+{
+    echo "================================================================="
+    echo "$(date '+%F %T')"
+    echo "COMMAND: $*"
+    echo "================================================================="
+} | tee -a "$LOGFILE"
+
+"$@" 2>&1 | tee -a "$LOGFILE"
+
+RC=${PIPESTATUS[0]}
+
+echo | tee -a "$LOGFILE"
+
+exit $RC
