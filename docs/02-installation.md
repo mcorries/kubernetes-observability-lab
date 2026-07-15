@@ -77,29 +77,54 @@ Verify the installation:
 ```bash
 docker version
 docker info
+```
+
+---
 
 ## Installing KinD
 
-Again, don't duplicate another guide.
+KinD is assumed to be installed before beginning this guide. This repository does not duplicate the official KinD installation instructions.
 
-```markdown
-KinD must already be installed.
-
-Verify:
+Verify the installation:
 
 ```bash
 kind version
-
+```
 
 ## Creating the Cluster
 
-kind create cluster --config kind-cluster.yaml
+A three-node KinD cluster (one control plane and two worker nodes) is used throughout this repository.
 
-A three-node KinD cluster (one control plane and two workers) is used throughout this repository. The cluster configuration is documented in ...
+Create the cluster using the repository configuration:
+
+```bash
+kind create cluster --config kind-cluster.yaml
+```
+
+Verify the cluster:
+
+```bash
+kubectl cluster-info
+kubectl get nodes -o wide
+kubectl get pods -A
+```
 
 ## Installing Helm
 
+Helm is an essential prerequisite for this lab and is used to deploy the Kubernetes monitoring stack (`kube-prometheus-stack`).
+
+Rather than duplicating the official installation instructions, install Helm by following the official documentation:
+
+https://helm.sh/docs/intro/install/
+
+Verify the installation:
+
+```bash
 helm version
+```
+
+Continue only once Helm reports its installed version successfully.
+
 
 ## Installing kube-prometheus-stack
 
@@ -273,14 +298,16 @@ This section will grow as additional installation and configuration issues are e
 
 Examples already include:
 
-Pods stuck in ContainerCreating
-Port already in use
-Swap file warning in Vim (developer tooling, not Kubernetes)
-WSL networking hiccups
-Image pull delays
-Helm release already exists
+- Pods stuck in `ContainerCreating`
+- Port already in use
+- Swap file warning in Vim (developer tooling, not Kubernetes)
+- WSL networking hiccups
+- Image pull delays
+- Helm release already exists
 
-Real engineering notes.
+These are real engineering issues encountered during development of the laboratory.
+Each entry will eventually document the symptoms, investigation,
+resolution and lessons learned.
 
 ## Where to Go Next
 
