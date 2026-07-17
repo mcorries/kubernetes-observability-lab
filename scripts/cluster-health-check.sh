@@ -17,6 +17,28 @@ PASS_COUNT=0
 WARN_COUNT=0
 FAIL_COUNT=0
 
+SECTIONS=(
+    "Framework|FRAMEWORK_CHECKS"
+    "Host|HOST_CHECKS"
+    "Cluster|CLUSTER_CHECKS"
+)
+
+FRAMEWORK_CHECKS=(
+    "Framework operational|check_framework"
+)
+
+HOST_CHECKS=(
+    "Docker daemon reachable|check_docker"
+    "kubectl available|check_kubectl"
+)
+
+CLUSTER_CHECKS=(
+    "Kubernetes API reachable|check_apiserver"
+    "All nodes Ready|check_nodes"
+)
+
+
+
 pass() {
     printf "[PASS] %s\n" "$1"
     ((++PASS_COUNT))
@@ -116,23 +138,38 @@ check_nodes() {
 
 }
 
+
+run_check_group() {
+
+    local checks=("$@")
+
+    for entry in "${checks[@]}"; do
+        IFS="|" read -r description function <<< "$entry"
+        run_check "$description" "$function"
+    done
+}
+
+run_checks() {
+
+    local section_name
+    local registry_name
+    local entry
+
+    for entry in "${SECTIONS[@]}"; do
+        IFS="|" read -r section_name registry_name <<< "$entry"
+
+        section "$section_name"
+
+        declare -n registry="$registry_name"
+        run_check_group "${registry[@]}"
+    done
+}
+
 main() {
 
-section "Framework"
+    run_checks
 
-run_check "Framework operational" check_framework
-	
-section "Host"
-
-run_check "Docker daemon reachable" check_docker
-run_check "kubectl available" check_kubectl
-
-section "Cluster"
-
-run_check "Kubernetes API reachable" check_apiserver
-run_check "All nodes Ready" check_nodes
-
-summary
+    summary
 
 }
 
