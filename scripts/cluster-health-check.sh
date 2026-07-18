@@ -35,6 +35,7 @@ HOST_CHECKS=(
 CLUSTER_CHECKS=(
     "Kubernetes API reachable|check_apiserver"
     "All nodes Ready|check_nodes"
+    "Metrics API operational|check_metrics_server"
 )
 
 
@@ -135,6 +136,12 @@ check_nodes() {
     ready=$(kubectl get nodes --no-headers 2>/dev/null | grep -c ' Ready ')
 
     [[ "$total" -eq "$ready" ]]
+
+}
+
+check_metrics_server() {
+
+    kubectl top nodes >/dev/null 2>&1
 
 }
 
