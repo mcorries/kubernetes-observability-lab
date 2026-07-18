@@ -6,7 +6,7 @@
 # Purpose: Validate infrastructure readiness before working with the lab.
 #
 # Author : Mark Corries
-# Version: 0.4.0
+# Version: 0.5.0
 ###############################################################################
 
 set -o errexit
@@ -18,10 +18,14 @@ WARN_COUNT=0
 FAIL_COUNT=0
 
 ###############################################################################
-# Configuration
+# Framework Configuration
 ###############################################################################
 
+SCRIPT_VERSION="0.5.0"
+
 BUSYBOX_IMAGE="busybox:1.38"
+
+HEALTHCHECK_POD_PREFIX="lab-health-test"
 
 SECTIONS=(
     "Framework|FRAMEWORK_CHECKS"
@@ -155,7 +159,9 @@ check_metrics_server() {
 
 check_coredns() {
 
-    kubectl run dns-test \
+local pod_name="${HEALTHCHECK_POD_PREFIX}-dns"
+
+kubectl run "$pod_name" \
         --rm \
         -i \
         --restart=Never \
