@@ -17,6 +17,12 @@ PASS_COUNT=0
 WARN_COUNT=0
 FAIL_COUNT=0
 
+###############################################################################
+# Configuration
+###############################################################################
+
+BUSYBOX_IMAGE="busybox:1.38"
+
 SECTIONS=(
     "Framework|FRAMEWORK_CHECKS"
     "Host|HOST_CHECKS"
@@ -36,6 +42,7 @@ CLUSTER_CHECKS=(
     "Kubernetes API reachable|check_apiserver"
     "All nodes Ready|check_nodes"
     "Metrics API operational|check_metrics_server"
+    "CoreDNS operational|check_coredns"
 )
 
 
@@ -142,6 +149,18 @@ check_nodes() {
 check_metrics_server() {
 
     kubectl top nodes >/dev/null 2>&1
+
+}
+
+
+check_coredns() {
+
+    kubectl run dns-test \
+        --rm \
+        -i \
+        --restart=Never \
+        --image="$BUSYBOX_IMAGE" \
+        -- nslookup kubernetes.default.svc.cluster.local >/dev/null 2>&1
 
 }
 
