@@ -16,6 +16,7 @@ set -o pipefail
 PASS_COUNT=0
 WARN_COUNT=0
 FAIL_COUNT=0
+CHECK_MESSAGE=""
 
 ###############################################################################
 # Framework Configuration
@@ -26,6 +27,9 @@ SCRIPT_VERSION="0.5.0"
 BUSYBOX_IMAGE="busybox:1.38"
 
 HEALTHCHECK_POD_PREFIX="lab-health-test"
+
+PVC_NAME="${HEALTHCHECK_POD_PREFIX}-pvc"
+POD_NAME="${HEALTHCHECK_POD_PREFIX}-pod"
 
 SECTIONS=(
     "Framework|FRAMEWORK_CHECKS"
@@ -47,12 +51,20 @@ CLUSTER_CHECKS=(
     "All nodes Ready|check_nodes"
     "Metrics API operational|check_metrics_server"
     "CoreDNS operational|check_coredns"
+    "Storage provisioning operational|check_storage"
 )
 
 
-
 pass() {
-    printf "[PASS] %s\n" "$1"
+    local message="$1"
+    local detail="${2:-}"
+
+    if [[ -n "$detail" ]]; then
+        printf "[PASS] %s (%s)\n" "$message" "$detail"
+    else
+        printf "[PASS] %s\n" "$message"
+    fi
+
     ((++PASS_COUNT))
 }
 
@@ -83,14 +95,20 @@ run_check() {
 
     case "$rc" in
         0)
-            pass "$description"
-            ;;
+            if [[ -n "${CHECK_MESSAGE:-}" ]]; then
+                pass "$description (${CHECK_MESSAGE})"
+                CHECK_MESSAGE=""
+	    else
+	        pass "$description"
+	    fi
+	    ;;
         1)
             warn "$description"
             ;;
         *)
             fail "$description"
             ;;
+
     esac
 }
 
@@ -157,6 +175,8 @@ check_metrics_server() {
 }
 
 
+
+
 check_coredns() {
 
 local pod_name="${HEALTHCHECK_POD_PREFIX}-dns"
@@ -168,6 +188,88 @@ kubectl run "$pod_name" \
         --image="$BUSYBOX_IMAGE" \
         -- nslookup kubernetes.default.svc.cluster.local >/dev/null 2>&1
 
+}
+
+
+check_storage() {
+
+DEFAULT_SC=$(
+    kubectl get storageclass \
+        -o jsonpath='{range .items[?(@.metadata.annotations.storageclass\.kubernetes\.io/is-default-class=="true")]}{.metadata.name}{end}'
+)
+
+[[ -z "$DEFAULT_SC" ]] && return 1
+
+STORAGE_PROVISIONER=$(
+        kubectl get storageclass "$DEFAULT_SC" \
+            -o jsonpath='{.provisioner}'
+)
+
+
+    kubectl delete pod "$POD_NAME" \
+        --ignore-not-found \
+        --wait=true >/dev/null 2>&1
+
+    kubectl delete pvc "$PVC_NAME" \
+        --ignore-not-found \
+        --wait=true >/dev/null 2>&1
+
+    kubectl apply -f - >/dev/null <<EOF
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ${PVC_NAME}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 64Mi
+  storageClassName: ${DEFAULT_SC}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ${POD_NAME}
+spec:
+  restartPolicy: Never
+  containers:
+  - name: busybox
+    image: ${BUSYBOX_IMAGE}
+    command: ["sh","-c","sleep 60"]
+    volumeMounts:
+    - name: storage
+      mountPath: /data
+  volumes:
+  - name: storage
+    persistentVolumeClaim:
+      claimName: ${PVC_NAME}
+EOF
+
+    kubectl wait \
+        --for=jsonpath='{.status.phase}'=Bound \
+        pvc/${PVC_NAME} \
+        --timeout=30s >/dev/null 2>&1 || return 1
+
+    kubectl wait \
+        --for=condition=Ready \
+        pod/${POD_NAME} \
+        --timeout=30s >/dev/null 2>&1 || return 1
+
+    kubectl exec "$POD_NAME" -- \
+        sh -c "echo PASS >/data/healthcheck.ok" >/dev/null 2>&1 || return 1
+
+    kubectl delete pod "$POD_NAME" \
+         --ignore-not-found \
+         --wait=true >/dev/null 2>&1
+
+    kubectl delete pvc "$PVC_NAME" \
+         --ignore-not-found \
+         --wait=true >/dev/null 2>&1 || return 1
+
+    CHECK_MESSAGE="StorageClass: ${DEFAULT_SC}, Provisioner: ${STORAGE_PROVISIONER}"
+
+    return 0
 }
 
 
