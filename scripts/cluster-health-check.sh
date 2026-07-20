@@ -6,7 +6,7 @@
 # Purpose: Validate infrastructure readiness before working with the lab.
 #
 # Author : Mark Corries
-# Version: 0.5.0
+# Version: 0.6.0
 ###############################################################################
 
 set -o errexit
@@ -17,12 +17,15 @@ PASS_COUNT=0
 WARN_COUNT=0
 FAIL_COUNT=0
 CHECK_MESSAGE=""
+SCRIPT_START=0
+SCRIPT_END=0
+TIMER_START=0
 
 ###############################################################################
 # Framework Configuration
 ###############################################################################
 
-SCRIPT_VERSION="0.5.0"
+SCRIPT_VERSION="0.6.0"
 
 BUSYBOX_IMAGE="busybox:1.38"
 
@@ -79,34 +82,78 @@ fail() {
 }
 
 section() {
+
     echo
     echo "============================================================"
     echo "$1"
     echo "============================================================"
 }
 
+timer_start() {
+
+    TIMER_START=$(date +%s%3N)
+
+}
+
+timer_stop() {
+
+    local label="$1"
+
+    local timer_end
+    local elapsed_ms
+
+    timer_end=$(date +%s%3N)
+
+    elapsed_ms=$((timer_end - TIMER_START))
+
+    printf "        %-24s %3d.%03ds\n" \
+        "$label" \
+        $((elapsed_ms / 1000)) \
+        $((elapsed_ms % 1000))
+
+}
+
 run_check() {
 
-    local description="$1"
-    local function="$2"
+    start_ms=$(date +%s%3N)
 
     "$function"
     local rc=$?
+     
+    end_ms=$(date +%s%3N)
+    
+    elapsed_ms=$((end_ms - start_ms))
+    
+    elapsed=$(printf "%d.%03ds" \
+        $((elapsed_ms / 1000)) \
+        $((elapsed_ms % 1000)))
 
     case "$rc" in
         0)
-            if [[ -n "${CHECK_MESSAGE:-}" ]]; then
-                pass "$description (${CHECK_MESSAGE})"
-                CHECK_MESSAGE=""
-	    else
-	        pass "$description"
+	  if [[ -n "${CHECK_MESSAGE:-}" ]]; then
+
+            pass "$description" "$elapsed"
+
+            [[ -n "${CHECK_MESSAGE_DETAIL_1:-}" ]] && \
+                printf "       %s\n" "$CHECK_MESSAGE_DETAIL_1"
+
+            [[ -n "${CHECK_MESSAGE_DETAIL_2:-}" ]] && \
+                 printf "       %s\n" "$CHECK_MESSAGE_DETAIL_2"
+
+            CHECK_MESSAGE=""
+            CHECK_MESSAGE_DETAIL_1=""
+            CHECK_MESSAGE_DETAIL_2=""
+
+          else
+     
+            pass "$description" "$elapsed" 
 	    fi
 	    ;;
         1)
-            warn "$description"
+            warn "$description" "$elapsed"
             ;;
         *)
-            fail "$description"
+            fail "$description" "$elapsed"
             ;;
 
     esac
@@ -115,11 +162,18 @@ run_check() {
 
 summary() {
 
+    SCRIPT_END=$(date +%s%3N)
+
+    elapsed_ms=$((SCRIPT_END - SCRIPT_START))
+
     section "Summary"
 
     printf "PASS : %d\n" "$PASS_COUNT"
     printf "WARN : %d\n" "$WARN_COUNT"
     printf "FAIL : %d\n" "$FAIL_COUNT"
+    printf "Time : %d.%03ds\n" \
+    $((elapsed_ms / 1000)) \
+    $((elapsed_ms % 1000))
 
     echo
 
@@ -205,6 +259,9 @@ STORAGE_PROVISIONER=$(
             -o jsonpath='{.provisioner}'
 )
 
+    echo 
+    echo "        Storage capability validation:"
+    timer_start
 
     kubectl delete pod "$POD_NAME" \
         --ignore-not-found \
@@ -213,6 +270,10 @@ STORAGE_PROVISIONER=$(
     kubectl delete pvc "$PVC_NAME" \
         --ignore-not-found \
         --wait=true >/dev/null 2>&1
+
+    timer_stop "Cleanup previous"
+
+    timer_start
 
     kubectl apply -f - >/dev/null <<EOF
 apiVersion: v1
@@ -246,19 +307,28 @@ spec:
       claimName: ${PVC_NAME}
 EOF
 
+    timer_stop "Create resources"
+    
+    timer_start
     kubectl wait \
         --for=jsonpath='{.status.phase}'=Bound \
         pvc/${PVC_NAME} \
         --timeout=30s >/dev/null 2>&1 || return 1
+    timer_stop "PVC Bound"
 
+    timer_start
     kubectl wait \
         --for=condition=Ready \
         pod/${POD_NAME} \
         --timeout=30s >/dev/null 2>&1 || return 1
+    timer_stop "Pod Ready"
 
+    timer_start
     kubectl exec "$POD_NAME" -- \
         sh -c "echo PASS >/data/healthcheck.ok" >/dev/null 2>&1 || return 1
+    timer_stop "Volume write"
 
+    timer_start
     kubectl delete pod "$POD_NAME" \
          --ignore-not-found \
          --wait=true >/dev/null 2>&1
@@ -266,8 +336,14 @@ EOF
     kubectl delete pvc "$PVC_NAME" \
          --ignore-not-found \
          --wait=true >/dev/null 2>&1 || return 1
+    
+    timer_stop "Final cleanup"
 
-    CHECK_MESSAGE="StorageClass: ${DEFAULT_SC}, Provisioner: ${STORAGE_PROVISIONER}"
+    echo
+
+    CHECK_MESSAGE="${elapsed}"
+    CHECK_MESSAGE_DETAIL_1="StorageClass: ${DEFAULT_SC}"
+    CHECK_MESSAGE_DETAIL_2="Provisioner : ${STORAGE_PROVISIONER}"
 
     return 0
 }
@@ -300,6 +376,8 @@ run_checks() {
 }
 
 main() {
+
+    SCRIPT_START=$(date +%s%3N)    
 
     run_checks
 
