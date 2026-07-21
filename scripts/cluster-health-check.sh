@@ -6,17 +6,18 @@
 # Purpose: Validate infrastructure readiness before working with the lab.
 #
 # Author : Mark Corries
-# Version: 0.7.0
 ###############################################################################
 
 set -o errexit
 set -o nounset
 set -o pipefail
 
+declare -a CHECK_RESULTS=()
+
 PASS_COUNT=0
 WARN_COUNT=0
 FAIL_COUNT=0
-CHECK_MESSAGE=""
+CHECK_EVIDENCE=""
 SCRIPT_START=0
 SCRIPT_END=0
 TIMER_START=0
@@ -26,7 +27,7 @@ TARGET="${1:-all}"
 # Framework Configuration
 ###############################################################################
 
-SCRIPT_VERSION="0.6.0"
+SCRIPT_VERSION="0.7.1"
 
 BUSYBOX_IMAGE="busybox:1.38"
 
@@ -65,7 +66,7 @@ CLUSTER_CHECKS=(
 )
 
 
-pass() {
+render_pass() {
     local message="$1"
     local detail="${2:-}"
 
@@ -78,12 +79,12 @@ pass() {
     ((++PASS_COUNT))
 }
 
-warn() {
+render_warn() {
     printf "[WARN] %s\n" "$1"
     ((++WARN_COUNT))
 }
 
-fail() {
+render_fail() {
     printf "[FAIL] %s\n" "$1"
     ((++FAIL_COUNT))
 }
@@ -137,37 +138,37 @@ run_check() {
 
     case "$rc" in
         0)
-	  if [[ -n "${CHECK_MESSAGE:-}" ]]; then
+	  if [[ -n "${CHECK_EVIDENCE:-}" ]]; then
 
-            pass "$description" "$elapsed"
+            render_pass "$description" "$elapsed"
 
-            [[ -n "${CHECK_MESSAGE_DETAIL_1:-}" ]] && \
-                printf "       %s\n" "$CHECK_MESSAGE_DETAIL_1"
+            [[ -n "${CHECK_EVIDENCE_1:-}" ]] && \
+                printf "       %s\n" "${CHECK_EVIDENCE_1}"
 
-            [[ -n "${CHECK_MESSAGE_DETAIL_2:-}" ]] && \
-                 printf "       %s\n" "$CHECK_MESSAGE_DETAIL_2"
+            [[ -n "${CHECK_EVIDENCE_2:-}" ]] && \
+                 printf "       %s\n" "${CHECK_EVIDENCE_2}"
 
-            CHECK_MESSAGE=""
-            CHECK_MESSAGE_DETAIL_1=""
-            CHECK_MESSAGE_DETAIL_2=""
+            CHECK_EVIDENCE=""
+            CHECK_EVIDENCE_1=""
+            CHECK_EVIDENCE_2=""
 
           else
      
-            pass "$description" "$elapsed" 
+            render_pass "$description" "$elapsed" 
 	    fi
 	    ;;
         1)
-            warn "$description" "$elapsed"
+            render_warn "$description" "$elapsed"
             ;;
         *)
-            fail "$description" "$elapsed"
+            render_fail "$description" "$elapsed"
             ;;
 
     esac
 }
 
 
-summary() {
+render_summary() {
 
     SCRIPT_END=$(date +%s%3N)
 
@@ -342,7 +343,7 @@ response=$(
 )
 
 if [[ "$response" != "PASS" ]]; then
-    CHECK_MESSAGE="Expected PASS, received '${response:-<empty>}'"
+    CHECK_EVIDENCE="Expected PASS, received '${response:-<empty>}'"
     return 2
 fi
 
@@ -461,9 +462,9 @@ EOF
 
     echo
 
-    CHECK_MESSAGE="${elapsed}"
-    CHECK_MESSAGE_DETAIL_1="StorageClass: ${DEFAULT_SC}"
-    CHECK_MESSAGE_DETAIL_2="Provisioner : ${STORAGE_PROVISIONER}"
+    CHECK_EVIDENCE="${elapsed}"
+    CHECK_EVIDENCE_1="StorageClass: ${DEFAULT_SC}"
+    CHECK_EVIDENCE_2="Provisioner : ${STORAGE_PROVISIONER}"
 
     return 0
 }
@@ -510,7 +511,7 @@ main() {
 
     run_checks
 
-    summary
+    render_summary
 
 }
 
