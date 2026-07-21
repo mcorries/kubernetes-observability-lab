@@ -121,6 +121,19 @@ timer_stop() {
 
 }
 
+store_result() {
+
+    local description="$1"
+    local status="$2"
+    local elapsed="$3"
+    local evidence="$4"
+
+    CHECK_RESULTS+=(
+        "${description}|${status}|${elapsed}|${evidence}"
+    )
+
+}
+
 run_check() {
 
     start_ms=$(date +%s%3N)
@@ -138,6 +151,13 @@ run_check() {
 
     case "$rc" in
         0)
+
+          store_result \
+            "$description" \
+            "PASS" \
+            "$elapsed" \
+            ""
+
 	  if [[ -n "${CHECK_EVIDENCE:-}" ]]; then
 
             render_pass "$description" "$elapsed"
@@ -158,15 +178,36 @@ run_check() {
 	    fi
 	    ;;
         1)
+            store_result \
+            "$description" \
+            "WARN" \
+            "$elapsed" \
+            ""
+  
             render_warn "$description" "$elapsed"
             ;;
         *)
+            store_result \
+            "$description" \
+            "FAIL" \
+            "$elapsed" \
+            "$CHECK_EVIDENCE"
+
             render_fail "$description" "$elapsed"
             ;;
 
     esac
 }
 
+
+dump_results() {
+
+    echo
+    echo "Stored Results"
+
+    printf '%s\n' "${CHECK_RESULTS[@]}"
+
+}
 
 render_summary() {
 
@@ -184,6 +225,7 @@ render_summary() {
     $((elapsed_ms % 1000))
 
     echo
+#   dump_results
 
     if (( FAIL_COUNT > 0 )); then
         exit 2
