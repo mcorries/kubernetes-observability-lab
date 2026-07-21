@@ -6,7 +6,7 @@
 # Purpose: Validate infrastructure readiness before working with the lab.
 #
 # Author : Mark Corries
-# Version: 0.6.0
+# Version: 0.7777777.0
 ###############################################################################
 
 set -o errexit
@@ -20,6 +20,7 @@ CHECK_MESSAGE=""
 SCRIPT_START=0
 SCRIPT_END=0
 TIMER_START=0
+TARGET="${1:-all}"
 
 ###############################################################################
 # Framework Configuration
@@ -33,6 +34,11 @@ HEALTHCHECK_POD_PREFIX="lab-health-test"
 
 PVC_NAME="${HEALTHCHECK_POD_PREFIX}-pvc"
 POD_NAME="${HEALTHCHECK_POD_PREFIX}-pod"
+
+SERVICE_TEST_NAMESPACE="lab-health-network-test"
+SERVICE_DEPLOYMENT="http-echo"
+SERVICE_NAME="http-echo"
+CLIENT_POD="http-client"
 
 SECTIONS=(
     "Framework|FRAMEWORK_CHECKS"
@@ -54,6 +60,7 @@ CLUSTER_CHECKS=(
     "All nodes Ready|check_nodes"
     "Metrics API operational|check_metrics_server"
     "CoreDNS operational|check_coredns"
+    "Service networking operational|check_service_networking"
     "Storage provisioning operational|check_storage"
 )
 
@@ -244,6 +251,119 @@ kubectl run "$pod_name" \
 
 }
 
+check_service_networking() {
+
+echo
+echo "        Service networking validation:"
+
+
+timer_start
+
+kubectl create namespace "$SERVICE_TEST_NAMESPACE" \
+    --dry-run=client -o yaml | kubectl apply -f - >/dev/null 2>&1
+
+kubectl create deployment "$SERVICE_DEPLOYMENT" \
+    --image=hashicorp/http-echo:1.0.0 \
+    --namespace "$SERVICE_TEST_NAMESPACE" \
+    --dry-run=client -o yaml \
+| kubectl apply -f - >/dev/null 2>&1
+
+kubectl patch deployment "$SERVICE_DEPLOYMENT" \
+    -n "$SERVICE_TEST_NAMESPACE" \
+    --type=json \
+    -p='[
+      {
+        "op":"add",
+        "path":"/spec/template/spec/containers/0/args",
+        "value":["-text=PASS"]
+      }
+    ]' >/dev/null 2>&1
+
+timer_stop "Create deployment"
+
+timer_start
+
+kubectl rollout status \
+    deployment/"$SERVICE_DEPLOYMENT" \
+    -n "$SERVICE_TEST_NAMESPACE" \
+    --timeout=60s >/dev/null 2>&1 || return 2
+
+timer_stop "Pod Ready"
+
+timer_start
+
+kubectl expose deployment "$SERVICE_DEPLOYMENT" \
+    --namespace "$SERVICE_TEST_NAMESPACE" \
+    --name "$SERVICE_NAME" \
+    --port=5678 \
+    --target-port=5678 \
+    >/dev/null 2>&1 || return 2
+
+timer_stop "Create service"
+
+timer_start
+
+for i in {1..30}; do
+
+    endpoint_ip=$(
+    kubectl get endpointslices.discovery.k8s.io \
+        -n "$SERVICE_TEST_NAMESPACE" \
+        -l kubernetes.io/service-name="$SERVICE_NAME" \
+        -o jsonpath='{.items[0].endpoints[0].addresses[0]}' \
+        2>/dev/null
+)
+
+    if [[ -n "$endpoint_ip" ]]; then
+        break
+    fi
+
+    sleep 1
+
+done
+
+[[ -z "$endpoint_ip" ]] && return 2
+
+timer_stop "Endpoint Ready"
+
+
+
+timer_start
+
+response=$(
+    kubectl run "$CLIENT_POD" \
+        -n "$SERVICE_TEST_NAMESPACE" \
+        --image=busybox:1.38 \
+        --restart=Never \
+        --attach \
+        --rm \
+        --quiet \
+        --command -- \
+        wget -qO- "http://$SERVICE_NAME:5678" 2>/dev/null
+)
+
+if [[ "$response" != "PASS" ]]; then
+    CHECK_MESSAGE="Expected PASS, received '${response:-<empty>}'"
+    return 2
+fi
+
+
+timer_stop "HTTP validation"
+
+
+timer_start
+
+kubectl delete namespace "$SERVICE_TEST_NAMESPACE" \
+    --wait=true \
+    >/dev/null 2>&1
+
+timer_stop "Final cleanup"
+
+
+
+    echo
+
+    return 0
+}
 
 check_storage() {
 
@@ -355,8 +475,17 @@ run_check_group() {
 
     for entry in "${checks[@]}"; do
         IFS="|" read -r description function <<< "$entry"
+
+        if [[ "$TARGET" != "all" && \
+           "$TARGET" != "$function" && \
+           "$TARGET" != "$alias" ]]; then
+        continue
+        fi
+
         run_check "$description" "$function"
+
     done
+
 }
 
 run_checks() {
