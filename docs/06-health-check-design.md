@@ -1,6 +1,6 @@
 # Health Check Design
 
-**Author:** Mark Corries
+**Author:** Kevin Rutenberg 
 **Version:** 0.7.0
 **Last Updated:** 21 July 2026
 

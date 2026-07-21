@@ -5,14 +5,17 @@
 # Project: Kubernetes Observability Lab
 # Purpose: Validate infrastructure readiness before working with the lab.
 #
-# Author : Mark Corries
+# Author : Kevin Rutenberg 
 ###############################################################################
 
 set -o errexit
 set -o nounset
 set -o pipefail
 
-declare -a CHECK_RESULTS=()
+declare -a RESULT_DESCRIPTION=()
+declare -a RESULT_STATUS=()
+declare -a RESULT_ELAPSED=()
+declare -a RESULT_EVIDENCE=()
 
 PASS_COUNT=0
 WARN_COUNT=0
@@ -123,14 +126,17 @@ timer_stop() {
 
 store_result() {
 
+
     local description="$1"
     local status="$2"
-    local elapsed="$3"
+    local duration="$3"
     local evidence="$4"
 
-    CHECK_RESULTS+=(
-        "${description}|${status}|${elapsed}|${evidence}"
-    )
+    RESULT_DESCRIPTION+=("$description")
+    RESULT_STATUS+=("$status")
+    RESULT_ELAPSED+=("$duration")
+    RESULT_EVIDENCE+=("$evidence")
+
 
 }
 
@@ -200,12 +206,23 @@ run_check() {
 }
 
 
-dump_results() {
+render_results() {
 
     echo
     echo "Stored Results"
 
-    printf '%s\n' "${CHECK_RESULTS[@]}"
+    local i
+
+    for ((i=0; i<${#RESULT_DESCRIPTION[@]}; i++)); do
+
+        printf "%-35s %-5s %-8s %s\n" \
+            "${RESULT_DESCRIPTION[$i]}" \
+            "${RESULT_STATUS[$i]}" \
+            "${RESULT_ELAPSED[$i]}" \
+            "${RESULT_EVIDENCE[$i]}"
+
+    done
+
 
 }
 
@@ -225,7 +242,7 @@ render_summary() {
     $((elapsed_ms % 1000))
 
     echo
-#   dump_results
+    render_results
 
     if (( FAIL_COUNT > 0 )); then
         exit 2
