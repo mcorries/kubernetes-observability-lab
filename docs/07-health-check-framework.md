@@ -1,7 +1,7 @@
 # Health Check Framework Design
 
 **Author:** Mark Corries  
-**Version:** 0.6.0  
+**Version:** 0.7.0  
 **Last Updated:** 20 July 2026
 
 ---

@@ -1,3 +1,10 @@
+# Health Check Design
+
+**Author:** Mark Corries
+**Version:** 0.7.0
+**Last Updated:** 21 July 2026
+
+
 # Lab Readiness Framework Design 
 
 **Project:** Kubernetes Observability Lab

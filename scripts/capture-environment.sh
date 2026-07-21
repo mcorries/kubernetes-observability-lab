@@ -79,7 +79,7 @@ cat >> "${OUTPUT_FILE}" <<EOF
 ## WSL ENVIRONMENT
 
 \`\`\`text
-$(wsl.exe --version 2>/dev/null | tr -d '\000')
+$(wsl.exe --version 2>/dev/null | iconv -f UTF-16LE -t UTF-8 | tr -d '\r')
 \`\`\`
 
 EOF

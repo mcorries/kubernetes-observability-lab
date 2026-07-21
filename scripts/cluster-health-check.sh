@@ -6,7 +6,7 @@
 # Purpose: Validate infrastructure readiness before working with the lab.
 #
 # Author : Mark Corries
-# Version: 0.7777777.0
+# Version: 0.7.0
 ###############################################################################
 
 set -o errexit
