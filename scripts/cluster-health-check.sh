@@ -12,10 +12,15 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+declare -a RESULT_ID=()
+declare -a RESULT_CATEGORY=()
 declare -a RESULT_DESCRIPTION=()
+declare -a RESULT_CAPABILITY=()
 declare -a RESULT_STATUS=()
 declare -a RESULT_ELAPSED=()
 declare -a RESULT_EVIDENCE=()
+declare -a RESULT_REASON=()
+declare -a RESULT_SEVERITY=()
 
 PASS_COUNT=0
 WARN_COUNT=0
@@ -126,21 +131,34 @@ timer_stop() {
 
 store_result() {
 
+    local id="$1"
+    local category="$2"
+    local description="$3"
+    local capability="$4"
+    local status="$5"
+    local elapsed="$6"
+    local evidence="$7"
+    local reason="$8"
+    local severity="$9"
 
-    local description="$1"
-    local status="$2"
-    local duration="$3"
-    local evidence="$4"
-
+    RESULT_ID+=("$id")
+    RESULT_CATEGORY+=("$category")
     RESULT_DESCRIPTION+=("$description")
+    RESULT_CAPABILITY+=("$capability")
     RESULT_STATUS+=("$status")
-    RESULT_ELAPSED+=("$duration")
+    RESULT_ELAPSED+=("$elapsed")
     RESULT_EVIDENCE+=("$evidence")
-
+    RESULT_REASON+=("$reason")
+    RESULT_SEVERITY+=("$severity")
 
 }
 
 run_check() {
+
+    CHECK_ID=""
+    CHECK_CATEGORY=""
+    CHECK_CAPABILITY=""
+    CHECK_SEVERITY=""
 
     start_ms=$(date +%s%3N)
 
@@ -158,11 +176,17 @@ run_check() {
     case "$rc" in
         0)
 
-          store_result \
-            "$description" \
-            "PASS" \
-            "$elapsed" \
-            ""
+	  
+	   store_result \
+    		"$CHECK_ID" \
+    		"$CHECK_CATEGORY" \
+    		"$description" \
+    		"$CHECK_CAPABILITY" \
+		"PASS" \
+    		"$elapsed" \
+    		"" \
+    		"" \
+    		"$CHECK_SEVERITY"
 
 	  if [[ -n "${CHECK_EVIDENCE:-}" ]]; then
 
@@ -184,20 +208,31 @@ run_check() {
 	    fi
 	    ;;
         1)
-            store_result \
-            "$description" \
-            "WARN" \
-            "$elapsed" \
-            ""
-  
+	     store_result \
+                "$CHECK_ID" \
+                "$CHECK_CATEGORY" \
+                "$description" \
+                "$CHECK_CAPABILITY" \
+                "WARN" \
+                "$elapsed" \
+                "" \
+                "" \
+                "$CHECK_SEVERITY"
+ 
             render_warn "$description" "$elapsed"
             ;;
         *)
-            store_result \
-            "$description" \
-            "FAIL" \
-            "$elapsed" \
-            "$CHECK_EVIDENCE"
+	    
+	     store_result \
+                "$CHECK_ID" \
+                "$CHECK_CATEGORY" \
+                "$description" \
+                "$CHECK_CAPABILITY" \
+                "FAIL" \
+                "$elapsed" \
+                "" \
+                "" \
+                "$CHECK_SEVERITY"
 
             render_fail "$description" "$elapsed"
             ;;
@@ -209,21 +244,30 @@ run_check() {
 render_results() {
 
     echo
-    echo "Stored Results"
+    section "Stored Results"
 
-    local i
+    printf "%-28s %-10s %-6s %8s\n" \
+        "ID" "CATEGORY" "STATUS" "ELAPSED"
 
-    for ((i=0; i<${#RESULT_DESCRIPTION[@]}; i++)); do
+    printf "%-28s %-10s %-6s %8s\n" \
+        "----------------------------" \
+        "----------" \
+        "------" \
+        "--------"
 
-        printf "%-35s %-5s %-8s %s\n" \
-            "${RESULT_DESCRIPTION[$i]}" \
+    for ((i=0; i<${#RESULT_ID[@]}; i++)); do
+        printf "%-28s %-10s %-6s %8s\n" \
+            "${RESULT_ID[$i]}" \
+            "${RESULT_CATEGORY[$i]}" \
             "${RESULT_STATUS[$i]}" \
-            "${RESULT_ELAPSED[$i]}" \
-            "${RESULT_EVIDENCE[$i]}"
-
+            "${RESULT_ELAPSED[$i]}"
     done
 
-
+    printf "%-28s %-10s %-6s %8s\n" \
+        "----------------------------" \
+        "----------" \
+        "------" \
+        "--------"
 }
 
 render_summary() {
@@ -255,11 +299,21 @@ render_summary() {
 
 check_docker() {
 
+    CHECK_ID="docker-daemon"
+    CHECK_CATEGORY="Host"
+    CHECK_CAPABILITY="Docker daemon availability"
+    CHECK_SEVERITY="INFO"
+
     docker info >/dev/null 2>&1
 
 }
 
 check_kubectl() {
+
+    CHECK_ID="kubectl-cli"
+    CHECK_CATEGORY="Host"
+    CHECK_CAPABILITY="kubectl client availability"
+    CHECK_SEVERITY="INFO"
 
     command -v kubectl >/dev/null 2>&1
 
@@ -267,17 +321,33 @@ check_kubectl() {
 
 check_apiserver() {
 
+    CHECK_ID="kubernetes-api"
+    CHECK_CATEGORY="Cluster"
+    CHECK_CAPABILITY="Kubernetes API availability"
+    CHECK_SEVERITY="INFO"
+
     kubectl cluster-info >/dev/null 2>&1
 
 }
 
 check_framework() {
+    
+
+    CHECK_ID="framework-operational"
+    CHECK_CATEGORY="Framework"
+    CHECK_CAPABILITY="Framework execution"
+    CHECK_SEVERITY="INFO"
 
     return 0
 
 }
 
 check_nodes() {
+    
+    CHECK_ID="node-readiness"
+    CHECK_CATEGORY="Cluster"
+    CHECK_CAPABILITY="Kubernetes node readiness"
+    CHECK_SEVERITY="INFO"
 
     local total ready
 
@@ -291,6 +361,12 @@ check_nodes() {
 
 check_metrics_server() {
 
+
+    CHECK_ID="metrics-api"
+    CHECK_CATEGORY="Cluster"
+    CHECK_CAPABILITY="Metrics API availability"
+    CHECK_SEVERITY="INFO"
+
     kubectl top nodes >/dev/null 2>&1
 
 }
@@ -299,6 +375,11 @@ check_metrics_server() {
 
 
 check_coredns() {
+
+CHECK_ID="cluster-dns"
+CHECK_CATEGORY="Cluster"
+CHECK_CAPABILITY="Cluster DNS resolution"
+CHECK_SEVERITY="INFO"
 
 local pod_name="${HEALTHCHECK_POD_PREFIX}-dns"
 
@@ -312,6 +393,12 @@ kubectl run "$pod_name" \
 }
 
 check_service_networking() {
+
+CHECK_ID="service-networking"
+CHECK_CATEGORY="Cluster"
+CHECK_CAPABILITY="Kubernetes Service networking"
+CHECK_SEVERITY="INFO"
+
 
 echo
 echo "        Service networking validation:"
@@ -426,6 +513,12 @@ timer_stop "Final cleanup"
 }
 
 check_storage() {
+
+
+CHECK_ID="storage-provisioning"
+CHECK_CATEGORY="Cluster"
+CHECK_CAPABILITY="Dynamic Persistent Volume provisioning"
+CHECK_SEVERITY="INFO"
 
 DEFAULT_SC=$(
     kubectl get storageclass \
