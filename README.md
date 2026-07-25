@@ -1,17 +1,169 @@
+> **Canonical Repository:** https://github.com/mcorries/kubernetes-observability-lab
+>
+> This repository is the original source for this project, its documentation, engineering notes and operational framework.
+
 # Kubernetes Observability Lab
 
-A reproducible Kubernetes observability lab built on WSL2 and KinD, documenting the design, implementation and operational validation of an extensible health-check framework and observability platform.
-
-## Engineering Philosophy
-
-> This repository is not intended to teach Kubernetes commands. It is intended to demonstrate an engineering approach to designing, validating and understanding Kubernetes platforms through observation, experimentation and repeatable operational verification.
-
-The emphasis throughout this repository is on understanding **why** a platform is healthy, **how** that health can be verified through repeatable capability-based validation, and **how** engineering decisions can be supported by observable evidence rather than assumption.
+A reproducible Kubernetes observability lab built on WSL2 and KinD, documenting the design, implementation and operational validation of an extensible capability-based validation framework and observability platform.
 
 ---
 
-## Status
+## Project Overview
 
-🚧 **Work in progress.**
+This repository documents the development of a lightweight, reproducible Kubernetes laboratory designed to explore platform health, observability and operational engineering.
 
-The initial focus is building a lightweight, reproducible observability platform before progressing to performance tuning, dashboards, alerting, autoscaling and long-term metrics analysis.
+Rather than focusing on Kubernetes commands in isolation, the project demonstrates how engineering decisions can be validated through repeatable testing, observable evidence and structured operational verification.
+
+The lab is intentionally built from readily available technologies—including Windows 11, WSL2, Docker Engine and KinD—to provide a realistic environment for experimentation without requiring cloud infrastructure.
+
+---
+
+## Engineering Philosophy
+
+> This repository is not intended to demonstrate Kubernetes commands. It is intended to demonstrate an engineering approach to designing, validating and understanding Kubernetes platforms through observation, experimentation and repeatable operational verification.
+
+A running Pod does not necessarily mean the service it provides is operational.
+
+Throughout this project, health is treated as a measurable capability rather than a simple resource state. Each validation is designed to exercise the capability being tested and collect observable evidence supporting the resulting operational conclusion.
+
+The emphasis is on understanding:
+
+* **why** a platform is healthy
+* **how** that health can be validated
+* **what** evidence supports that conclusion
+* **how** operational assumptions can be replaced by repeatable verification
+
+---
+
+## Framework Characteristics
+
+The health-check framework developed within this repository is designed around several engineering principles:
+
+* Data-driven framework architecture
+* Capability-based validation
+* Structured result collection
+* Repeatable operational evidence
+* Deterministic execution lifecycle
+* Automatic resource cleanup
+* Interrupt-safe execution
+* Extensible validation model
+
+Rather than checking only that Kubernetes resources exist, the framework validates that the services they provide are functioning correctly.
+
+---
+
+## Technology Stack
+
+* Windows 11
+* WSL2
+* Ubuntu 24.04 LTS
+* Docker Engine 29.x
+* Kubernetes 1.35
+* kubectl 1.36
+* KinD 0.31
+* Helm 3.x
+* Prometheus (current tested release)
+* Grafana (current tested release)
+* Bash 5.x
+
+The complete software inventory, package versions and environment details used to build this lab are captured in `docs/05-lab-environment.md`, which is regenerated whenever the environment changes.
+
+---
+
+## Current Capabilities
+
+Current framework validation includes:
+
+* Framework operational validation
+* Docker daemon availability
+* kubectl availability
+* Kubernetes API connectivity
+* Kubernetes node readiness
+* Metrics API validation
+* CoreDNS capability validation
+* Service networking capability validation
+* Dynamic Persistent Volume provisioning validation
+
+Each capability is validated through functional testing rather than simple resource inspection wherever practical.
+
+---
+
+## Repository Structure
+
+```text
+.
+├── docs/
+│   ├── Project documentation
+│   ├── Design notes
+│   └── Engineering decisions
+│
+├── monitoring/
+│   ├── Prometheus
+│   ├── Grafana
+│   └── Monitoring resources
+│
+├── scripts/
+│   └── Operational tooling and framework scripts
+│
+├── LICENSE
+└── README.md
+```
+
+---
+
+## Project Objectives
+
+The long-term goal is to evolve this repository into a practical reference for Kubernetes operational engineering, covering topics including:
+
+* Observability
+* Platform validation
+* Performance investigation
+* Metrics analysis
+* Dashboards
+* Alerting
+* Operational troubleshooting
+* Engineering documentation
+
+The emphasis throughout remains understanding platform behaviour rather than simply deploying tooling.
+
+---
+
+## Current Status
+
+### Completed
+
+* Reproducible local Kubernetes laboratory
+* Observability platform foundation
+* Capability-based health-check framework
+* Structured result collection
+* Operational lifecycle management
+* Interrupt-safe execution
+* Evidence-based validation methodology
+
+### In Progress
+
+* Documentation refinement
+* Observability integration
+* Grafana dashboard development
+* Prometheus analysis
+* Additional capability validation
+
+---
+
+## Documentation
+
+The `docs/` directory contains detailed documentation covering:
+
+* Lab installation
+* Environment configuration
+* Framework design
+* Engineering principles
+* Operational validation
+* Project evolution
+
+---
+
+## License
+
+This project is licensed under the terms of the MIT License. See the `LICENSE` file for details.
+

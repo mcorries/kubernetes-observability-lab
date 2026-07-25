@@ -2,15 +2,14 @@
 
 ###############################################################################
 #
-# Kubernetes Observability Lab
+# Script : capture-environment.sh
+# Project: Kubernetes Observability Lab
+# Repository : https://github.com/mcorries/kubernetes-observability-lab
+# Purpose : Capture the software and Kubernetes environment used for the lab.
+# Output : docs/05-lab-environment.md
 #
-# capture-environment.sh
-#
-# Captures the software and Kubernetes environment used for the lab.
-#
-# Output:
-#   docs/05-lab-environment.md
-#
+# Author : Kevin Rutenberg
+# License: MIT
 ###############################################################################
 
 set -euo pipefail

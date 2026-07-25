@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
 
 ###############################################################################
-# Script : cluster-health-check.sh
-# Project: Kubernetes Observability Lab
-# Purpose: Validate infrastructure readiness before working with the lab.
+# Script     : cluster-health-check.sh
+# Project    : Kubernetes Observability Lab
+# Repository : https://github.com/mcorries/kubernetes-observability-lab
+# Purpose    : Validate infrastructure readiness before working with the lab.
 #
-# Author : Kevin Rutenberg 
+# Author     : Kevin Rutenberg
+# License    : MIT
 ###############################################################################
 
 set -o errexit
 set -o nounset
 set -o pipefail
+# set -x
 
 declare -a RESULT_ID=()
 declare -a RESULT_CATEGORY=()
@@ -392,6 +395,51 @@ kubectl run "$pod_name" \
 
 }
 
+###############################################################################
+# Cleanup helpers
+###############################################################################
+
+cleanup_service_networking() {
+
+    [[ -n "${SERVICE_TEST_NAMESPACE:-}" ]] || return 0
+
+    kubectl delete namespace "$SERVICE_TEST_NAMESPACE" \
+        --ignore-not-found \
+        --wait=true >/dev/null 2>&1 || true
+}
+
+cleanup_storage() {
+
+    [[ -n "${POD_NAME:-}" ]] || return 0
+    [[ -n "${PVC_NAME:-}" ]] || return 0
+
+    kubectl delete pod "$POD_NAME" \
+        --ignore-not-found \
+        --wait=true >/dev/null 2>&1 || true
+
+    kubectl delete pvc "$PVC_NAME" \
+        --ignore-not-found \
+        --wait=true >/dev/null 2>&1 || true
+}
+
+cleanup_resources() {
+
+    cleanup_service_networking
+    cleanup_storage
+}
+
+on_exit() {
+    cleanup_resources
+}
+
+on_interrupt() {
+    echo
+    echo
+    echo "[INFO] Interrupted - performing emergency cleanup..."
+    cleanup_resources
+    exit 130
+}
+
 check_service_networking() {
 
 CHECK_ID="service-networking"
@@ -403,8 +451,16 @@ CHECK_SEVERITY="INFO"
 echo
 echo "        Service networking validation:"
 
+timer_start
+
+cleanup_service_networking
+
+timer_stop "Cleanup previous"
+
+echo
 
 timer_start
+
 
 kubectl create namespace "$SERVICE_TEST_NAMESPACE" \
     --dry-run=client -o yaml | kubectl apply -f - >/dev/null 2>&1
@@ -496,16 +552,11 @@ fi
 
 timer_stop "HTTP validation"
 
-
 timer_start
 
-kubectl delete namespace "$SERVICE_TEST_NAMESPACE" \
-    --wait=true \
-    >/dev/null 2>&1
+cleanup_service_networking
 
 timer_stop "Final cleanup"
-
-
 
     echo
 
@@ -534,21 +585,19 @@ STORAGE_PROVISIONER=$(
 
     echo 
     echo "        Storage capability validation:"
-    timer_start
 
-    kubectl delete pod "$POD_NAME" \
-        --ignore-not-found \
-        --wait=true >/dev/null 2>&1
 
-    kubectl delete pvc "$PVC_NAME" \
-        --ignore-not-found \
-        --wait=true >/dev/null 2>&1
+timer_start
 
-    timer_stop "Cleanup previous"
+cleanup_storage
 
-    timer_start
+timer_stop "Cleanup previous"
 
-    kubectl apply -f - >/dev/null <<EOF
+echo
+
+timer_start
+
+kubectl apply -f - >/dev/null <<EOF
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -580,37 +629,32 @@ spec:
       claimName: ${PVC_NAME}
 EOF
 
-    timer_stop "Create resources"
+timer_stop "Create resources"
     
-    timer_start
+timer_start
     kubectl wait \
         --for=jsonpath='{.status.phase}'=Bound \
         pvc/${PVC_NAME} \
         --timeout=30s >/dev/null 2>&1 || return 1
-    timer_stop "PVC Bound"
+timer_stop "PVC Bound"
 
-    timer_start
+timer_start
     kubectl wait \
         --for=condition=Ready \
         pod/${POD_NAME} \
         --timeout=30s >/dev/null 2>&1 || return 1
-    timer_stop "Pod Ready"
+timer_stop "Pod Ready"
 
-    timer_start
+timer_start
     kubectl exec "$POD_NAME" -- \
         sh -c "echo PASS >/data/healthcheck.ok" >/dev/null 2>&1 || return 1
-    timer_stop "Volume write"
+timer_stop "Volume write"
 
-    timer_start
-    kubectl delete pod "$POD_NAME" \
-         --ignore-not-found \
-         --wait=true >/dev/null 2>&1
+timer_start
 
-    kubectl delete pvc "$PVC_NAME" \
-         --ignore-not-found \
-         --wait=true >/dev/null 2>&1 || return 1
-    
-    timer_stop "Final cleanup"
+cleanup_storage
+
+timer_stop "Final cleanup"
 
     echo
 
@@ -658,6 +702,9 @@ run_checks() {
 }
 
 main() {
+
+    trap on_exit EXIT
+    trap on_interrupt INT TERM
 
     SCRIPT_START=$(date +%s%3N)    
 
