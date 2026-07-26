@@ -1,7 +1,7 @@
-# Health Check Design
+# Capability Validation Framework Architecture
 
 **Author:** Kevin Rutenberg 
-**Version:** 0.7.0
+**Version:** 0.8.0
 **Last Updated:** 21 July 2026
 
 
@@ -20,8 +20,7 @@ The goal of the framework is **not** simply to verify that Kubernetes
 objects exist. Instead, it aims to validate that the lab environment is
 fully operational and ready for observability work.
 
-Whenever possible, health checks validate **functionality** rather than
-resource existence.
+Whenever practical, health checks validate operational capability through functional testing supported by observable evidence, rather than relying on resource existence alone.
 
 ---
 
@@ -126,9 +125,9 @@ Each function should simply return an exit status.
 
 | Return Code | Meaning |
 |-------------|---------|
-| 0 | PASS |
-| 1 | WARN |
-| 2+ | FAIL |
+| 0           | PASS |
+| 1           | WARN |
+| 2+          | FAIL |
 
 The framework is responsible for displaying results.
 
@@ -155,30 +154,136 @@ kubectl logs deployment/metrics-server -n kube-system
 
 ---
 
-# Current Validation Strategy
+## 8. Validate capability before remediation
 
-| Component | Validation Method | Type |
-|-----------|-------------------|------|
-| Docker | `docker info` | Functional |
-| kubectl | `command -v kubectl` | Availability |
-| API Server | `kubectl cluster-info` | Functional |
-| Nodes | `kubectl get nodes` | Readiness |
-| Metrics API | `kubectl top nodes` | Functional |
+When validation fails:
+
+- Collect evidence
+- Understand the capability failure
+- Then consider remediation
+
+Not the reverse.
+
+---
+
+## 9. Health != Capability
+
+This deserves its own principle.
+
+Running Pods and Ready Deployments are indicators of resource state, not proof that the capability they provide is operational.
+
+Capability must be exercised to demonstrate that it is functioning as intended.
+
+---
+
+## 10. Implementation Independence
+
+Different Kubernetes implementations may legitimately behave differently.
+
+Frameworks should validate behaviour, not implementation details.
+
+---
+
+## 11. Evidence Collection
+
+Each validation should collect sufficient evidence to explain its conclusion.
+
+Evidence should explain the operational conclusion, not merely report PASS or FAIL.
+
+---
+
+## 12. Framework Extensibility
+
+The framework architecture separates execution logic from validation implementations, allowing new capability checks to be added without modifying the execution engine. 
+This encourages incremental growth while maintaining a consistent operational workflow.
+
+---
+
+# Current Capability Coverage
+
+| Capability           | Validation               |
+| -------------------- | ------------------------ |
+| Docker daemon        | `docker info`            |
+| kubectl              | executable availability  |
+| Kubernetes API       | `kubectl cluster-info`   |
+| Node readiness       | Ready state              |
+| Metrics API          | `kubectl top nodes`      |
+| CoreDNS              | in-cluster DNS lookup    |
+| Service networking   | workload connectivity    |
+| Storage provisioning | dynamic PVC/PV lifecycle |
 
 ---
 
 # Future Validation Targets
 
-- CoreDNS
-- kube-proxy
-- CNI
-- StorageClasses
-- Persistent Volumes
-- Prometheus
-- Grafana
-- Alertmanager
-- Portainer
-- Jenkins
+- Cluster capabilities
+- Networking
+- Storage
+- Observability
+- Monitoring infrastructure
+- CI/CD tooling
+- Operational integrations
+
+( Potential validation targets include: 
+* CoreDNS
+* kube-proxy
+* CNI
+* StorageClasses
+* Persistent Volumes
+* Prometheus
+* Grafana
+* Alertmanager
+* Portainer
+* Jenkins
+)
+
+
+---
+
+## Architecture
+
+```text
+Framework Architecture
+        |
+        v
+Execution Engine
+        |
+        v
+Validation Definitions
+        |
+        v
+Validation Functions
+        |
+        v
+Structured Result Collection
+        |
+        v
+Summary Rendering
+```
+
+---
+
+## Lifecycle
+
+
+```text
+Initialisation
+        |
+        v      
+Execute validations
+        |
+        v      
+Collect structured results
+        |
+        v
+Cleanup temporary resources
+        |
+        v
+Render report
+        |
+        v
+Return overall status
+```
 
 ---
 
@@ -188,4 +293,12 @@ The readiness framework should become the single command executed before
 every lab session.
 
 Its purpose is to provide confidence that the complete lab environment is
-ready for development, experimentation and observability testing.
+ready for development, experimentation and operational validation.
+
+---
+
+## Observability Connection
+
+The capability validation framework establishes operational confidence before observability data is interpreted. Observability explains platform behaviour over time; capability validation confirms that the platform is capable of providing the services being observed.
+
+

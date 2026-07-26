@@ -4,7 +4,7 @@
 
 # Kubernetes Observability Lab
 
-A reproducible Kubernetes observability lab built on WSL2 and KinD, documenting the design, implementation and operational validation of an extensible capability-based validation framework and observability platform.
+A reproducible Kubernetes observability lab built on WSL2 and KinD, documenting the design, implementation and operational validation of an extensible capability-based operational validation framework together with an evolving observability platform.
 
 ---
 
@@ -25,6 +25,7 @@ The lab is intentionally built from readily available technologies—including W
 A running Pod does not necessarily mean the service it provides is operational.
 
 Throughout this project, health is treated as a measurable capability rather than a simple resource state. Each validation is designed to exercise the capability being tested and collect observable evidence supporting the resulting operational conclusion.
+Health and capability are intentionally treated as separate concepts. A healthy resource is not, by itself, evidence that the service it provides is operational. Validation should exercise the capability relied upon by users and dependent components.
 
 The emphasis is on understanding:
 
@@ -70,7 +71,7 @@ The complete software inventory, package versions and environment details used t
 
 ---
 
-## Current Capabilities
+## Current Validation Capabilities
 
 Current framework validation includes:
 
@@ -115,19 +116,11 @@ Each capability is validated through functional testing rather than simple resou
 
 The long-term goal is to evolve this repository into a practical reference for Kubernetes operational engineering, covering topics including:
 
-* Observability
-* Platform validation
-* Performance investigation
-* Metrics analysis
-* Dashboards
-* Alerting
-* Operational troubleshooting
-* Engineering documentation
+Develop a practical operational engineering reference demonstrating how platform capabilities can be validated, observed, measured and diagnosed using repeatable evidence collected from Kubernetes and its supporting infrastructure.
 
 The emphasis throughout remains understanding platform behaviour rather than simply deploying tooling.
 
 ---
-
 ## Current Status
 
 ### Completed
@@ -142,11 +135,11 @@ The emphasis throughout remains understanding platform behaviour rather than sim
 
 ### In Progress
 
-* Documentation refinement
 * Observability integration
-* Grafana dashboard development
-* Prometheus analysis
-* Additional capability validation
+* Metrics correlation
+* Capability trend analysis
+* Operational diagnostics
+* Evidence-driven troubleshooting
 
 ---
 
