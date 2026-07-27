@@ -2,7 +2,7 @@
 
 **Author:** Kevin Rutenberg 
 **Version:** 0.8.0
-**Last Updated:** 21 July 2026
+**Last Updated:** 27 July 2026
 
 
 # Lab Readiness Framework Design 
@@ -201,16 +201,16 @@ This encourages incremental growth while maintaining a consistent operational wo
 
 # Current Capability Coverage
 
-| Capability           | Validation               |
-| -------------------- | ------------------------ |
-| Docker daemon        | `docker info`            |
-| kubectl              | executable availability  |
-| Kubernetes API       | `kubectl cluster-info`   |
-| Node readiness       | Ready state              |
-| Metrics API          | `kubectl top nodes`      |
-| CoreDNS              | in-cluster DNS lookup    |
-| Service networking   | workload connectivity    |
-| Storage provisioning | dynamic PVC/PV lifecycle |
+| Capability | Validation |
+|------------|------------|
+| Docker daemon | `docker info` |
+| kubectl | Executable availability |
+| Kubernetes API | `kubectl cluster-info` |
+| Node readiness | Ready state |
+| Metrics API | `kubectl top nodes` |
+| CoreDNS | In-cluster DNS lookup |
+| Service networking | Workload connectivity |
+| Storage provisioning | Dynamic PV provisioning |
 
 ---
 

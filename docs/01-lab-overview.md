@@ -133,4 +133,6 @@ The emphasis will remain on understanding Kubernetes behaviour through evidence,
 - `07-health-check-framework.md`  
   Explains how to use, interpret and extend the health check framework.
 
+- `CHANGELOG.md`  
+  Summarises significant project milestones, architectural changes and feature evolution.
 
