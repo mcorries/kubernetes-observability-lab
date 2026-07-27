@@ -99,7 +99,6 @@ The laboratory currently provides:
 - A reproducible KinD-based Kubernetes platform.
 - Automated environment capture and documentation.
 - Capability-based health and readiness validation.
-- Integrated observability components including Prometheus and Grafana.
 - Repeatable engineering workflows for experimentation and operational verification.
 
 ## Future Direction
