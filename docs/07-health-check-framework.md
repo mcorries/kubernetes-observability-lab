@@ -1,8 +1,8 @@
 # Health Check Framework Design
 
 **Author:** Kevin Rutenberg  
-**Version:** 0.7.0  
-**Last Updated:** 20 July 2026
+**Version:** 0.9.0  
+**Last Updated:** 27 July 2026
 
 ---
 
@@ -51,6 +51,20 @@ Each group is defined as an array containing:
 The generic execution engine (`run_check_group()`) executes every check identically, allowing new capability checks to be added without modifying the framework itself.
 
 This keeps the framework simple to extend while maintaining consistent behaviour across all validation routines.
+
+The framework follows a data-driven architecture in which validation definitions are separated from the execution engine. This allows new capability validations to be introduced with minimal changes to the framework itself while maintaining consistent execution, reporting and cleanup behaviour.
+
+---
+
+## Framework Cleanup
+
+The framework is designed to leave the laboratory in a predictable state regardless of whether execution completes successfully, encounters an error or is interrupted by the user.
+
+Temporary resources created during capability validation are automatically removed as part of the framework's cleanup process. Signal handling ensures that cleanup routines execute before the framework exits, helping to prevent orphaned resources from affecting subsequent validation runs.
+
+This behaviour supports repeatable execution while maintaining a consistent laboratory environment.
+
+Cleanup is considered part of the framework's operational lifecycle rather than an optional post-processing step.
 
 ---
 
@@ -217,6 +231,12 @@ This validates:
 - Service routing
 - Application connectivity
 
+## Framework Extensibility
+
+New capability validations can be added by implementing the validation function and registering it with the framework's validation definitions.
+
+The existing execution engine, structured result collection, reporting and cleanup behaviour are inherited automatically, allowing the framework to evolve without altering its core operational workflow.
+
 # Design Philosophy
 
 The objective of this framework is not to produce a green "PASS" report.
@@ -234,3 +254,23 @@ but also:
 and, when appropriate,
 
 > What evidence supports that conclusion?
+
+## Related Documentation
+
+- `00-project-objectives.md`  
+  Defines the project's objectives, scope and engineering philosophy.
+
+- `01-lab-overview.md`  
+  Introduces the laboratory and provides a structured guide to the repository.
+
+- `03-architecture.md`  
+  Describes the laboratory architecture and how the capability validation framework fits within the overall platform.
+
+- `05-lab-environment.md`  
+  Captures the current laboratory environment and software versions generated from the live platform.
+
+- `06-health-check-design.md`  
+  Describes the design philosophy, architectural principles and capability validation strategy that underpin the framework.
+
+- `CHANGELOG.md`  
+  Summarises significant project milestones, architectural changes and feature evolution.
