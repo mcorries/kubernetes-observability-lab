@@ -4,7 +4,7 @@
 
 # Kubernetes Observability Lab
 
-A reproducible Kubernetes observability lab built on WSL2 and KinD, documenting the design, implementation and operational validation of an extensible capability-based operational validation framework together with an evolving observability platform.
+A reproducible Kubernetes observability lab built on WSL2 and KinD, documenting the design, implementation, operational validation and investigation of an extensible capability-based validation framework and an evolving Kubernetes observability platform.
 
 ---
 
@@ -92,23 +92,31 @@ Each capability is validated through functional testing rather than simple resou
 ## Repository Structure
 
 ```text
-.
-├── docs/
-│   ├── Project documentation
-│   ├── Design notes
-│   └── Engineering decisions
-│
-├── monitoring/
-│   ├── Prometheus
-│   ├── Grafana
-│   └── Monitoring resources
-│
-├── scripts/
-│   └── Operational tooling and framework scripts
-│
-├── LICENSE
-└── README.md
+
+kubernetes-observability-lab/
+├── docs/                  # Core documentation (Project documentation including Design notes and Engineering decisions)
+├── monitoring/            # Helm values and monitoring configuration (Prometheus, Grafana, monitoring resources)
+├── scripts/               # Health checks and automation (Operational tooling and framework scripts)
+├── case-studies/          # Engineering investigations and analyses
+├── experiments/           # Experimental work and prototypes
+├── reference/             # Supporting reference material
+├── architecture/          # Architecture diagrams
+├── checkpoints/           # Checkpoint documentation
+├── CHANGELOG.md
+├── README.md
+└── LICENSE
+
 ```
+
+---
+
+## Engineering Case Studies
+
+The repository includes documented engineering investigations that demonstrate a structured approach to analysing platform behaviour, gathering evidence, validating hypotheses and making evidence-based engineering decisions.
+
+Current case studies include:
+
+- **Case Study 01 – Control Plane Metrics Investigation**
 
 ---
 
