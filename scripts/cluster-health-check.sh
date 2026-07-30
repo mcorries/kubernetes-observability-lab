@@ -10,6 +10,12 @@
 # License    : MIT
 ###############################################################################
 
+# TODO: 20/07/2026
+# Add an optional cross-node service networking capability test.
+# Current validation verifies ClusterIP service networking.
+# A future enhancement should explicitly validate communication
+# between pods scheduled on different worker nodes.
+
 set -o errexit
 set -o nounset
 set -o pipefail
@@ -532,6 +538,8 @@ timer_stop "Endpoint Ready"
 
 timer_start
 
+set +e
+
 response=$(
     kubectl run "$CLIENT_POD" \
         -n "$SERVICE_TEST_NAMESPACE" \
@@ -543,6 +551,10 @@ response=$(
         --command -- \
         wget -qO- "http://$SERVICE_NAME:5678" 2>/dev/null
 )
+
+rc=$?
+
+set -e
 
 if [[ "$response" != "PASS" ]]; then
     CHECK_EVIDENCE="Expected PASS, received '${response:-<empty>}'"
