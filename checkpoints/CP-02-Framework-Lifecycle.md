@@ -1,6 +1,6 @@
 # Checkpoint 02 — Framework Lifecycle
 
-**Date:** Sun 26 Jul 2026
+**Date:** 26 Jul 2026
 
 ## Git
 
