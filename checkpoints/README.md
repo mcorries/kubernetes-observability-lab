@@ -6,7 +6,7 @@ A checkpoint represents a **known-good engineering milestone** in the project's 
 
 Unlike a traditional changelog, checkpoints record not only **what** changed, but also **why** those changes were made, the engineering decisions behind them and the objectives for the next phase of development.
 
-The associated WSL export archives are stored outside of this repository due to their size.
+The associated WSL export archives are stored outside of this repository due to their size. Each checkpoint document records the corresponding archive filename, allowing the repository state and recoverable laboratory environment to be correlated.
 
 ---
 
@@ -41,9 +41,10 @@ Each checkpoint document records:
 
 ## Checkpoint Index
 
-| Checkpoint | Date        | Description         | Status  |
-| ---------- | ----------- | ------------------- | --------|
-| CP-02      | 26 Jul 2026 | Framework Lifecycle | Current |
+| Checkpoint | Date | Description | Status |
+| ---------- | ----------- | ---------------------------------------------- | -------- |
+| CP-02 | 26 Jul 2026 | Framework Lifecycle | Archived |
+| CP-03 | 29 Jul 2026 | Pre-metrics endpoint scrape change | Current |
 
 > As new checkpoints are created, append them to this table and update the previous checkpoint status from **Current** to **Archived**.
 
@@ -65,3 +66,4 @@ Together with the associated WSL environment export, these checkpoint documents 
 
 This approach ensures that every significant milestone can be reproduced, validated and explained—not simply recovered.
 
+Checkpoints establish engineering baselines from which subsequent platform changes, investigations and observability enhancements can be measured and evaluated.

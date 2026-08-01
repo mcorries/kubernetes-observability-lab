@@ -1,8 +1,8 @@
-# Health Check Framework Design
+# Capability Validation Framework User Guide
 
 **Author:** Kevin Rutenberg  
 **Version:** 0.9.0  
-**Last Updated:** 27 July 2026
+**Last Updated:** 01 Aug 2026
 
 ---
 
@@ -10,7 +10,7 @@
 
 The Kubernetes Observability Lab health check framework is designed to verify the operational capability of a Kubernetes cluster rather than simply confirming the existence of Kubernetes resources.
 
-The framework provides a consistent, extensible and repeatable mechanism for validating the health of both the host environment and the Kubernetes platform using functional capability tests.
+The framework provides a consistent, extensible and repeatable mechanism that validates the operational capabilities of both the host environment and the Kubernetes platform through functional testing. 
 
 This repository is not intended to demonstrate Kubernetes commands. It is intended to demonstrate an engineering approach to designing, validating and understanding Kubernetes platforms through observation, experimentation and repeatable operational verification.
 
@@ -104,6 +104,7 @@ Functional validation provides significantly higher confidence than resource exi
 - All nodes Ready
 - Metrics API operational
 - CoreDNS operational
+- Service networking
 - Storage provisioning operational
 
 ---
@@ -193,9 +194,8 @@ The framework should discover characteristics of the current Kubernetes environm
 
 # Future Capability Areas
 
-Potential future capability tests include:
+Potential future capability areas include:
 
-- Service networking (completed - see below)
 - Ingress
 - Helm
 - Dashboard
@@ -253,7 +253,7 @@ but also:
 
 and, when appropriate,
 
-> What evidence supports that conclusion?
+> Every validation should increase operational understanding, not merely produce another successful test result. 
 
 ## Related Documentation
 

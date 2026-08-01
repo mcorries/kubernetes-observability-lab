@@ -1,6 +1,6 @@
 **Author:** Kevin Rutenberg  
-**Version:** 0.1.0  
-**Last Updated:** 27 July 2026
+**Version:** 0.9.0  
+**Last Updated:** 31 docs/03-architecture.md July 2026
 
 **Project:** Kubernetes Observability Lab
 
@@ -74,25 +74,45 @@ At a high level, the laboratory consists of four architectural layers:
 The following sections describe each layer in more detail.
 
 ```mermaid
+
 flowchart TD
-    A[Windows 11 Host]
+    A[Windows 11]
     B[WSL2 Ubuntu]
     C[Docker Engine]
-    D[KinD Kubernetes Cluster]
+    D[KinD Kubernetes]
 
     E[Core Kubernetes Services]
 
-    F[Platform Services<br/>Dashboard<br/>Prometheus<br/>Grafana<br/>Portainer<br/>Jenkins]
+    F[Observability Platform
+Prometheus
+Grafana
+Metrics Server]
 
-    G[Engineering Layer<br/>Capability Validation<br/>Environment Capture<br/>Documentation<br/>Experiments]
+    G[Capability Validation Framework]
+
+    H[Engineering Documentation
+Environment Capture
+Case Studies
+Checkpoints]
 
     A --> B
     B --> C
     C --> D
     D --> E
     E --> F
-    F --> G
+    E --> G
+    F --> H
+    G --> H
+
 ```
+
+The laboratory architecture is governed by several guiding principles:
+
+- Separate platform infrastructure from engineering tooling.
+- Validate capabilities through observable behaviour.
+- Prefer reproducibility over complexity.
+- Introduce change incrementally and measure its effects.
+- Preserve a known-good baseline before significant architectural changes.
 
 ## Host Platform
 
@@ -142,7 +162,7 @@ Current platform services include:
 - Portainer
 - Jenkins
 - GitHub Webhook integration
-
+- kube-state-metrics
 
 ## Networking
 
@@ -161,14 +181,19 @@ The laboratory validates storage capability by exercising the complete provision
 
 A typical engineering session follows a structured operational workflow designed to establish platform confidence before experimentation begins.
 
-The workflow consists of:
-
-1. Start the laboratory environment.
-2. Verify platform readiness using the capability validation framework.
-3. Capture or review the current laboratory environment where appropriate.
-4. Perform engineering activities or experiments.
-5. Document observations and conclusions.
-6. Commit and publish validated changes.
+Start laboratory
+↓
+Validate platform capabilities
+↓
+Collect baseline observations
+↓
+Implement controlled change
+↓
+Observe and analyse results
+↓
+Document conclusions
+↓
+Commit validated improvements
 
 ## Design Decisions
 
@@ -181,7 +206,7 @@ Each architectural decision has been guided by the objective of creating a labor
 
 The laboratory architecture has been designed to evolve incrementally as additional platform capabilities and engineering workflows are introduced.
 
-Future development is expected to include deeper observability integration, expanded capability validation, additional operational tooling and a growing library of structured engineering experiments.
+Future development is expected to include , expanded platform instrumentation and observability integration, additional operational tooling and a growing library of structured engineering experiments.
 
 Throughout this evolution, the laboratory will continue to prioritise reproducibility, evidence-based engineering and clear separation of architectural responsibilities.
 

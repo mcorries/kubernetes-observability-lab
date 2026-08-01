@@ -1,6 +1,6 @@
 **Author:** Kevin Rutenberg  
-**Version:** 0.1.0  
-**Last Updated:** 27 July 2026
+**Version:** 0.9.0  
+**Last Updated:** 01 Aug 2026
 
 **Project:** Kubernetes Observability Lab
 
@@ -23,9 +23,11 @@ The baseline captures the core characteristics of the laboratory, including:
 - Operating environment
 - Kubernetes platform
 - Core platform services
+- Observability platform
 - Capability validation status
-- Reference measurements
+- Reference operational measurements
 - Repository state
+- Checkpoint association
 
 Detailed configuration information is maintained separately within the supporting documentation referenced at the end of this document.
 
@@ -34,7 +36,7 @@ Detailed configuration information is maintained separately within the supportin
 
 The initial baseline represents the laboratory following successful installation, configuration and validation of the core Kubernetes platform.
 
-At this stage, the laboratory provides a stable multi-node Kubernetes environment together with the foundational engineering tooling required to support repeatable experimentation, capability validation and future observability integration.
+At this stage, the laboratory provides a stable multi-node Kubernetes environment together with the foundational engineering tooling required to support repeatable experimentation, capability validation and ongoing observability engineering.
 
 The baseline establishes the reference point from which subsequent architectural enhancements and operational capabilities will evolve.
 
@@ -47,11 +49,12 @@ Typical baseline measurements include:
 
 - Kubernetes version
 - Cluster topology
-- Node count
 - Core platform services
+- Observability platform components
 - Capability validation results
 - Environment capture information
 - Repository version
+- Checkpoint reference
 - Performance observations where appropriate
 
 Detailed environment information is maintained in `05-lab-environment.md` and updated independently of this baseline document.
@@ -62,6 +65,7 @@ Detailed environment information is maintained in `05-lab-environment.md` and up
 The baseline should remain stable throughout the lifetime of a given architectural milestone.
 
 Rather than modifying historical baselines, significant platform changes should establish a new baseline that documents the laboratory's evolved state while preserving earlier reference points for comparison.
+Each documented baseline should correspond to a repository checkpoint where practical, allowing configuration, documentation and platform state to be correlated with a recoverable laboratory snapshot.
 
 This approach provides an auditable record of the laboratory's engineering progression.
 
@@ -72,6 +76,8 @@ Future engineering work should compare new capabilities and architectural change
 Comparisons may include functional capability, platform behaviour, performance characteristics, resource utilisation and operational workflows.
 
 Documented comparisons help distinguish intentional improvements from unexpected regressions while supporting evidence-based engineering decisions.
+
+- Observability coverage
 
 ## Related Documentation
 

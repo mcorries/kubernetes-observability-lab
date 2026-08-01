@@ -1,11 +1,8 @@
 # Capability Validation Framework Architecture
 
 **Author:** Kevin Rutenberg 
-**Version:** 0.8.0
-**Last Updated:** 27 July 2026
-
-
-# Lab Readiness Framework Design 
+**Version:** 0.9.0
+**Last Updated:** 01 Aug 2026
 
 **Project:** Kubernetes Observability Lab
 
@@ -18,7 +15,7 @@ This document describes the design philosophy behind the
 
 The goal of the framework is **not** simply to verify that Kubernetes
 objects exist. Instead, it aims to validate that the lab environment is
-fully operational and ready for observability work.
+fully operational and capable of supporting engineering investigation, experimentation and observability.
 
 Whenever practical, health checks validate operational capability through functional testing supported by observable evidence, rather than relying on resource existence alone.
 
@@ -199,6 +196,12 @@ This encourages incremental growth while maintaining a consistent operational wo
 
 ---
 
+## 13. Engineering Trade-offs
+
+Engineering decisions should balance correctness, reproducibility, complexity and operational value. The framework should favour solutions that maximise observable engineering evidence rather than technical sophistication alone.
+
+---
+
 # Current Capability Coverage
 
 | Capability | Validation |
@@ -211,32 +214,30 @@ This encourages incremental growth while maintaining a consistent operational wo
 | CoreDNS | In-cluster DNS lookup |
 | Service networking | Workload connectivity |
 | Storage provisioning | Dynamic PV provisioning |
+| Observability platform | Planned |
 
 ---
 
 # Future Validation Targets
 
-- Cluster capabilities
-- Networking
-- Storage
-- Observability
-- Monitoring infrastructure
-- CI/CD tooling
-- Operational integrations
+## Platform
+- Control-plane metrics
+- kube-proxy
+- CoreDNS
+- CNI
 
-( Potential validation targets include: 
-* CoreDNS
-* kube-proxy
-* CNI
-* StorageClasses
-* Persistent Volumes
-* Prometheus
-* Grafana
-* Alertmanager
-* Portainer
-* Jenkins
-)
+## Storage
+- StorageClasses
+- Persistent Volumes
 
+## Observability
+- Prometheus
+- Grafana
+- Alertmanager
+
+## Engineering Services
+- Portainer
+- Jenkins
 
 ---
 
@@ -247,6 +248,9 @@ Framework Architecture
         |
         v
 Execution Engine
+        |
+        v
+Capability Registry
         |
         v
 Validation Definitions
@@ -269,17 +273,17 @@ Summary Rendering
 ```text
 Initialisation
         |
-        v      
-Execute validations
+        v
+Execute capability validations
         |
-        v      
-Collect structured results
+        v
+Collect evidence
         |
         v
 Cleanup temporary resources
         |
         v
-Render report
+Render structured report
         |
         v
 Return overall status

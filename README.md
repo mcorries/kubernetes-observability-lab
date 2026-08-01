@@ -4,7 +4,7 @@
 
 # Kubernetes Observability Lab
 
-A reproducible Kubernetes observability lab built on WSL2 and KinD, documenting the design, implementation, operational validation and investigation of an extensible capability-based validation framework and an evolving Kubernetes observability platform.
+A reproducible Kubernetes observability lab built on WSL2 and KinD, documenting the design, implementation, operational validation, instrumentation and engineering investigation of an extensible capability-based validation framework and evolving Kubernetes observability platform. 
 
 ---
 
@@ -95,15 +95,16 @@ Each capability is validated through functional testing rather than simple resou
 
 kubernetes-observability-lab/
 ├── docs/                  # Core documentation (Project documentation including Design notes and Engineering decisions)
+│   ├── architecture/      # Architecture diagrams
+│   ├── experiments/       # Experimental work and prototypes
+│   └── reference/         # Supporting reference material
 ├── monitoring/            # Helm values and monitoring configuration (Prometheus, Grafana, monitoring resources)
 ├── scripts/               # Health checks and automation (Operational tooling and framework scripts)
-├── case-studies/          # Engineering investigations and analyses
-├── experiments/           # Experimental work and prototypes
-├── reference/             # Supporting reference material
-├── architecture/          # Architecture diagrams
 ├── checkpoints/           # Checkpoint documentation
-├── CHANGELOG.md
+├── case-studies/          # Engineering investigations and analyses
+├── images/
 ├── README.md
+├── CHANGELOG.md
 └── LICENSE
 
 ```
@@ -117,6 +118,7 @@ The repository includes documented engineering investigations that demonstrate a
 Current case studies include:
 
 - **Case Study 01 – Control Plane Metrics Investigation**
+- **Case Study 02 – Control Plane Metrics Remediation**
 
 ---
 
@@ -161,6 +163,8 @@ The `docs/` directory contains detailed documentation covering:
 * Engineering principles
 * Operational validation
 * Project evolution
+
+For readers new to the project, `docs/01-lab-overview.md` provides the recommended reading order and a structured introduction to the laboratory, its engineering philosophy and supporting documentation.
 
 ---
 

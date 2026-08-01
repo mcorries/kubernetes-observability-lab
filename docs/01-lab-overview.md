@@ -1,7 +1,7 @@
 
 **Author:** Kevin Rutenberg  
-**Version:** 0.1.0  
-**Last Updated:** 27 July 2026
+**Version:** 0.9.0  
+**Last Updated:** 31 July 2026
 
 **Project:** Kubernetes Observability Lab
 
@@ -60,20 +60,33 @@ Every component of the laboratory is designed around a small set of engineering 
 - Documentation should explain engineering decisions, not merely record commands.
 - The laboratory should remain portable, reproducible and easy to extend.
 
+## Engineering Approach
+
+The laboratory evolves through an iterative engineering process:
+
+1. Establish a reproducible baseline.
+2. Introduce a controlled change.
+3. Measure the resulting behaviour.
+4. Analyse observable evidence.
+5. Document conclusions.
+6. Incorporate validated improvements into the platform.
+
+This cycle underpins both the operational tooling and the engineering documentation throughout the repository.
+
 ## Repository Structure
 
-The repository is organised into logical components that separate documentation, automation and platform resources.
+The repository is organised into logical components that separate documentation, operational tooling, observability resources and engineering artefacts.
 
 | Directory | Purpose |
 |-----------|---------|
-| `docs/` | Project documentation, architectural design and operational guidance. |
-| `scripts/` | Automation scripts for environment capture, validation and operational tasks. |
-| `monitoring/` | Kubernetes manifests and configuration related to the observability platform. |
-| `architecture/` | Architecture diagrams and supporting design assets. |
-| `reference/` | Reference material, technical notes and supporting information. |
-| `experiments/` | Structured engineering experiments, observations and findings. |
+| `docs/` | Core documentation, including architecture, reference material and engineering experiments. |
+| `scripts/` | Operational tooling, automation and the capability validation framework. |
+| `monitoring/` | Observability manifests, dashboards, baselines and monitoring experiments. |
+| `case-studies/` | Engineering investigations, analyses and remediation case studies. |
+| `checkpoints/` | Checkpoint documentation, recovery notes and milestone history. |
+| `images/` | Architecture diagrams, dashboard screenshots and supporting graphics. |
 
-This structure is intended to support continued growth while maintaining a clear separation between implementation, documentation and experimental work.
+This structure separates implementation, documentation, operational tooling and engineering evidence while providing a scalable foundation for future development.
 
 ## Learning Path
 
@@ -98,14 +111,15 @@ The laboratory currently provides:
 
 - A reproducible KinD-based Kubernetes platform.
 - Automated environment capture and documentation.
-- Capability-based health and readiness validation.
-- Repeatable engineering workflows for experimentation and operational verification.
+- Capability-based validation framework with structured result collection.
+- Deterministic operational lifecycle with automatic resource cleanup.
+- Foundational observability platform integrating Prometheus, Grafana and Kubernetes metrics.
 
 ## Future Direction
 
 The laboratory will continue to evolve as new platform capabilities are introduced and validated.
 
-Future development is expected to include expanded observability integration, additional capability validation, structured engineering experiments and continued refinement of operational workflows.
+Future development will continue to expand the observability platform, extend capability validation, introduce additional engineering case studies, and refine the operational tooling that supports evidence-based platform analysis.
 
 The emphasis will remain on understanding Kubernetes behaviour through evidence, measurement and repeatable experimentation.
 
